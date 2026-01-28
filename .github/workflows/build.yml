@@ -7,13 +7,20 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04 # Kita kunci di Ubuntu 22.04 biar stabil
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Bersih-bersih Ruang Masak
+      # INI PENTING: Kita paksa pake Java 17 biar Android SDK seneng
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Bersih-bersih & Install Bumbu
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -24,19 +31,20 @@ jobs:
             gstreamer1.0-plugins-good libffi-dev libssl-dev automake autoconf \
             libtool pkg-config zip unzip libncurses5-dev libncursesw5-dev
 
-      - name: Install Buildozer & Cython Fix
+      - name: Install Buildozer & Cython (Versi Kunci)
         run: |
           pip3 install --upgrade pip
-          pip3 install "cython<3.0" 
+          # Kita kunci Cython di versi 0.29.33 biar kompatibel sama Kivy
+          pip3 install "Cython==0.29.33"
           pip3 install buildozer
 
-      - name: Mulai Masak APK (Buildozer)
+      - name: Mulai Masak APK
+        # Kita pakai yes | buat otomatis setuju lisensi SDK
         run: |
           yes | buildozer -v android debug
 
       - name: Upload APK Hasil Masakan
         uses: actions/upload-artifact@v4
         with:
-          # NAMA FILE DOWNLOAD JADI LAUNDRY
           name: Laundry-APK
           path: bin/*.apk
