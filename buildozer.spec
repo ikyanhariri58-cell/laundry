@@ -15,6 +15,10 @@ source.dir = .
 # (str) Source files to include (let empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas,srt
 
+# (str) Application versioning (method 1)
+# INI YANG TADI KELUPAAN BRO!
+version = 1.0
+
 # (list) Application requirements
 # PENTING: Ada ffmpeg, openssl, dan libffi
 requirements = python3,kivy,ffmpeg,ffmpeg-python,openssl,libffi
