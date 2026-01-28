@@ -1,18 +1,50 @@
-- name: Siapkan Izin dan Lisensi
+name: Masak APK Laundry Final
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Buildozer & Cython
         run: |
-          # 1. Pastikan file ffmpeg ada dan bisa dieksekusi
-          if [ -f "ffmpeg" ]; then
-            chmod +x ffmpeg
-            echo "✅ Mesin FFmpeg ditemukan!"
-          else
-            echo "❌ ERROR: File ffmpeg tidak ada di root folder!"
+          pip3 install "Cython==0.29.33" buildozer
+          sudo apt-get update
+          sudo apt-get install -y build-essential zip unzip zlib1g-dev libffi-dev libssl-dev
+
+      - name: Cari dan Aktifkan Mesin FFmpeg
+        run: |
+          # Cari file ffmpeg di semua folder
+          FOUND_FFMPEG=$(find . -name "ffmpeg" -type f | head -n 1)
+          
+          if [ -z "$FOUND_FFMPEG" ]; then
+            echo "❌ ERROR: File ffmpeg beneran gak ada di repo!"
             ls -R
             exit 1
+          else
+            echo "✅ Ketemu di: $FOUND_FFMPEG"
+            # Pindahkan ke root biar buildozer gampang nemunya
+            cp "$FOUND_FFMPEG" ./ffmpeg
+            chmod +x ./ffmpeg
           fi
-          
-          # 2. Terima lisensi Android SDK secara otomatis (cara lebih stabil)
+
+      - name: Mulai Masak APK
+        run: |
+          # Terima lisensi dulu biar gak Broken Pipe
           mkdir -p ~/.android
           touch ~/.android/repositories.cfg
-          yes | sdkmanager --licenses || echo "Licenses already accepted or failed but moving on..."
-
-    
+          yes | sdkmanager --licenses || echo "License check skipped"
+          buildozer -v android debug
