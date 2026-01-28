@@ -1,38 +1,18 @@
-name: Masak APK Laundry Final
-
-on:
-  push:
-    branches: [ main, master ]
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Install Buildozer & Cython
+- name: Siapkan Izin dan Lisensi
         run: |
-          pip3 install "Cython==0.29.33" buildozer
-          sudo apt-get update
-          sudo apt-get install -y build-essential zip unzip zlib1g-dev
+          # 1. Pastikan file ffmpeg ada dan bisa dieksekusi
+          if [ -f "ffmpeg" ]; then
+            chmod +x ffmpeg
+            echo "✅ Mesin FFmpeg ditemukan!"
+          else
+            echo "❌ ERROR: File ffmpeg tidak ada di root folder!"
+            ls -R
+            exit 1
+          fi
+          
+          # 2. Terima lisensi Android SDK secara otomatis (cara lebih stabil)
+          mkdir -p ~/.android
+          touch ~/.android/repositories.cfg
+          yes | sdkmanager --licenses || echo "Licenses already accepted or failed but moving on..."
 
-      - name: Mulai Masak APK
-        run: |
-          # Kasih izin jalan buat mesin ffmpeg yang lu upload
-          chmod +x ffmpeg 
-          yes | buildozer -v android debug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Laundry-APK-Jadi
-          path: bin/*.apk
+    
