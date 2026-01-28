@@ -25,20 +25,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential zip unzip zlib1g-dev libffi-dev libssl-dev
 
-      - name: Cari dan Aktifkan Mesin FFmpeg
+      - name: Aktifkan Mesin FFmpeg
         run: |
-          # Cari file ffmpeg di semua folder
-          FOUND_FFMPEG=$(find . -name "ffmpeg" -type f | head -n 1)
-          
-          if [ -z "$FOUND_FFMPEG" ]; then
-            echo "❌ ERROR: File ffmpeg beneran gak ada di repo!"
+          # 1. Cek apakah file ada
+          if [ -f "ffmpeg" ]; then
+            echo "✅ Mesin ketemu di root!"
+            # 2. Kasih izin jalan (Ini yang paling penting)
+            chmod +x ffmpeg
+          else
+            echo "❌ ERROR: File ffmpeg gak ada! Coba upload ulang ke halaman depan."
             ls -R
             exit 1
-          else
-            echo "✅ Ketemu di: $FOUND_FFMPEG"
-            # Pindahkan ke root biar buildozer gampang nemunya
-            cp "$FOUND_FFMPEG" ./ffmpeg
-            chmod +x ./ffmpeg
           fi
 
       - name: Mulai Masak APK
