@@ -13,33 +13,35 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Kita siapin Java 17 buat Android SDK
+      # Setup Java 17 (Wajib buat Android SDK terbaru)
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # HAPUS SEMUA LIBRARY KONFLIK (FFMPEG, SDL2, GSTREAMER DIHAPUS)
-      # Kita cuma install alat tukang (Compiler) aja.
-      - name: Bersih-bersih & Install Alat Tukang
+      # INI RESEP RAHASIANYA:
+      # Kita install 'nasm' (buat FFmpeg) dan 'libtool-bin'.
+      # Kita JANGAN install 'ffmpeg' sistem biar gak konflik.
+      - name: Install Alat Tukang (Tanpa Konflik)
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             build-essential git python3 python3-dev \
             libffi-dev libssl-dev automake autoconf \
-            libtool pkg-config zip unzip zlib1g-dev \
-            libncurses5-dev libncursesw5-dev libtinfo5 cmake
+            libtool libtool-bin pkg-config zip unzip zlib1g-dev \
+            libncurses5-dev libncursesw5-dev libtinfo5 cmake \
+            nasm yasm gettext
 
       - name: Install Buildozer & Cython
         run: |
           pip3 install --upgrade pip
-          # Kunci Cython di versi stabil
+          # Kita kunci Cython di versi stabil Kivy
           pip3 install "Cython==0.29.33"
           pip3 install buildozer
 
       - name: Mulai Masak APK
-        # yes | untuk auto-accept lisensi
+        # yes | untuk auto-accept semua pertanyaan
         run: |
           yes | buildozer -v android debug
 
